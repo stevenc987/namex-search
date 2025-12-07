@@ -8,15 +8,17 @@
 JVM_MEM="1g"
 
 # Change for follower vs leader
-IMAGE="name-request-solr-leader"
+#IMAGE="name-request-solr-leader"
+IMAGE="name-request-solr-follower"
 
 # Change per env
-ENV="dev"
-LABEL="Development"
+# ENV="dev"
+# LABEL="Development"
+ENV="test"
+LABEL="Test"
 
-# Change per app
-IMAGE_PROJECT="**-dev"
-IMAGE_REPO="temp-namex"
+IMAGE_PROJECT="c4hnrd-tools"
+IMAGE_REPO="vm-repo"
 
 CONTAINER_NAME="solr-container"
 ZONE="northamerica-northeast1"
@@ -62,11 +64,11 @@ else
 
   # Stop container and copy files into host (so that we can apply a volume onto it)
   docker stop $CONTAINER_NAME
-  
+
   # copy initialzed files
   docker cp $CONTAINER_NAME:$CONTAINER_MOUNT_PATH $HOST_COPY_PATH
   docker cp $CONTAINER_NAME:$CONTAINER_MOUNT_PATH_ENV $HOST_COPY_PATH
-  
+
   # set solr user as the owner so that it has needed permissions
   sudo chown -R solr: $HOME/*/**
   sudo chmod -R 777 $HOME/*/**
@@ -83,4 +85,13 @@ fi
 
 # Start the container again with the volume so that the data persists
 echo "Running solr container..."
-docker run -d --name=$CONTAINER_NAME --log-driver=gcplogs -v $HOST_MOUNT_PATH:$CONTAINER_MOUNT_PATH -v $HOST_MOUNT_PATH_ENV:$CONTAINER_MOUNT_PATH_ENV -p 8983:8983 $IMAGE_PATH:$ENV
+SOLR_OPTS="-Djetty.host=0.0.0.0 -Dsolr.environment=$SOLR_ENV_SETTINGS"
+
+docker run -d \
+  --name=$CONTAINER_NAME \
+  --log-driver=gcplogs \
+  -v $HOST_MOUNT_PATH:$CONTAINER_MOUNT_PATH \
+  -v $HOST_MOUNT_PATH_ENV:$CONTAINER_MOUNT_PATH_ENV \
+  -p 8983:8983 \
+  -e SOLR_OPTS="$SOLR_OPTS" \
+  $IMAGE_PATH:$ENV

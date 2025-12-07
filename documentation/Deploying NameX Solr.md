@@ -10,15 +10,22 @@
 
 Set initial variables:
 ```
-ENV=
+SOURCE_TAG=test
+```
+```
+ENV=test
 ```
 
 ```
-PROJECT=
+PROJECT=a083gt
 ```
 
 ```
 PROJECT_ID=$PROJECT-$ENV
+```
+
+```
+ARTIFACT_REGISTRY_PROJECT=c4hnrd-tools
 ```
 
 ### Building the new images (for DEV only)
@@ -33,46 +40,43 @@ PROJECT_ID=$PROJECT-$ENV
 	```
 3. Tag the leader and follower images in preparation for the GCP atrifactory repo push:
    ```
-   docker tag name-request-solr-leader northamerica-northeast1-docker.pkg.dev/$PROJECT-dev/temp-namex/name-request-solr-leader:dev
+   docker tag name-request-solr-leader northamerica-northeast1-docker.pkg.dev/$ARTIFACT_REGISTRY_PROJECT/vm-repo/name-request-solr-leader:$ENV
 	```
 	```
-   docker tag name-request-solr-follower northamerica-northeast1-docker.pkg.dev/$PROJECT-dev/temp-namex/name-request-solr-follower:dev
+   docker tag name-request-solr-follower northamerica-northeast1-docker.pkg.dev/$ARTIFACT_REGISTRY_PROJECT/vm-repo/name-request-solr-follower:$ENV
 	```
 4. Push the images to the GCP artifiactory repo:
    ```
-   docker push northamerica-northeast1-docker.pkg.dev/$PROJECT-dev/temp-namex/name-request-solr-leader:dev
+   docker push northamerica-northeast1-docker.pkg.dev/$ARTIFACT_REGISTRY_PROJECT/vm-repo/name-request-solr-leader:$SOURCE_TAG
 	```
 
 	```
-   docker push northamerica-northeast1-docker.pkg.dev/$PROJECT-dev/temp-namex/name-request-solr-follower:dev
+   docker push northamerica-northeast1-docker.pkg.dev/$ARTIFACT_REGISTRY_PROJECT/vm-repo/name-request-solr-follower:$SOURCE_TAG
 	```
 
 ### Tagging the images (for TEST / PROD only)
 
 *Update to 'test' for a prod deploy*
+
 ```
-SOURCE_TAG=dev
+gcloud artifacts docker tags add northamerica-northeast1-docker.pkg.dev/$ARTIFACT_REGISTRY_PROJECT/vm-repo/name-request-solr-leader:$SOURCE_TAG northamerica-northeast1-docker.pkg.dev/$ARTIFACT_REGISTRY_PROJECT/vm-repo/name-request-solr-leader:$ENV
 ```
 
 ```
-gcloud artifacts docker tags add northamerica-northeast1-docker.pkg.dev/$PROJECT-dev/temp-namex/name-request-solr-leader:$SOURCE_TAG northamerica-northeast1-docker.pkg.dev/$PROJECT-dev/temp-namex/name-request-solr-leader:$ENV
+gcloud artifacts docker tags add northamerica-northeast1-docker.pkg.dev/$ARTIFACT_REGISTRY_PROJECT/vm-repo/name-request-solr-follower:$SOURCE_TAG northamerica-northeast1-docker.pkg.dev/$ARTIFACT_REGISTRY_PROJECT/vm-repo/name-request-solr-follower:$ENV
 ```
 
-```
-gcloud artifacts docker tags add northamerica-northeast1-docker.pkg.dev/$PROJECT-dev/temp-namex/name-request-solr-follower:$SOURCE_TAG northamerica-northeast1-docker.pkg.dev/$PROJECT--tools/temp-namex/name-request-solr-follower:$ENV
-```
-
-### Deploying the new instances
+### Deploying the new instances <-- HERE
 
 1. Set the NEW leader and follower instance names:
    ```
    NEW_LEADER_VM=namex-solr-leader-$ENV-$(date -u +"%Y-%m-%d--%H%M%S")
    ```
-   
+
    ```
    NEW_FOLLOWER_VM=namex-solr-follower-$ENV-$(date -u +"%Y-%m-%d--%H%M%S")
    ```
-2. Set the OLD leader name (for later):
+2. Set the OLD leader name (for later): <-- don't need to when setting up brand new instance <-- Not needed first time
    ```
    OLD_LEADER_VM=$(gcloud compute instances list --format="value(name)" --filter name:namex-solr-leader-$ENV --project=$PROJECT_ID)
    ```
@@ -92,10 +96,10 @@ gcloud artifacts docker tags add northamerica-northeast1-docker.pkg.dev/$PROJECT
     ```
     gcloud compute instance-groups unmanaged add-instances namex-solr-leader-grp-$ENV --zone northamerica-northeast1-a --instances $NEW_LEADER_VM --project $PROJECT_ID
     ```
-7. Remove the OLD leader from the leader network (*NOTE: after this point, updates will not be seen in the search until the new solr is up*):
+<!-- 7. Remove the OLD leader from the leader network (*NOTE: after this point, updates will not be seen in the search until the new solr is up*):  <-- don't need to when setting up brand new instance
     ```
     gcloud compute instance-groups unmanaged remove-instances namex-solr-leader-grp-$ENV --zone northamerica-northeast1-a --instances $OLD_LEADER_VM --project $PROJECT_ID
-    ```
+    ``` -->
 8. Run the Importer
    - manually run the importer (it will load all the data inside the new instance)
 1. Create the new FOLLOWER instance:
@@ -112,14 +116,14 @@ gcloud artifacts docker tags add northamerica-northeast1-docker.pkg.dev/$PROJECT
     curl -X POST -H 'Content-type: application/json' -d '{"set-user-property":{"solr.leaderUrl": "http://'${NEW_LEADER_INTERNAL_IP}':8983/solr/namex_search"}}' http://$NEW_FOLLOWER_EXTERNAL_IP:8983/solr/namex_search_follower/config/requestHandler
     ```
 4. Wait for the new FOLLOWER instance to finish copying the leader index *(~tbd mins for prod)* / check logs for errors: *<NEW_FOLLOWER_EXTERNAL_IP>:8983/solr/namex_search_follower/replication*
-5. Add the NEW follower instance to the follower network:
+5. Add the NEW follower instance to the follower network: // <- DONE
     ```
     gcloud compute instance-groups unmanaged add-instances namex-solr-follower-grp-$ENV --zone northamerica-northeast1-a --instances $NEW_FOLLOWER_VM --project $PROJECT_ID
     ```
-6. Remove the OLD follower from the follower network:
+<!-- 6. Remove the OLD follower from the follower network:  <-- don't need to when setting up brand new instance
     ```
     gcloud compute instance-groups unmanaged remove-instances namex-solr-follower-grp-$ENV --zone northamerica-northeast1-a --instances $OLD_FOLLOWER_VM --project $PROJECT_ID
-    ```
+    ``` -->
 7. Test out the search / check the logs. Ensure everything is working as expected. If there is an issue with the NEW instances *add the OLD instances back to their respective networks and remove or delete the NEW instances*
 8. Delete the OLD instances:
     ```
