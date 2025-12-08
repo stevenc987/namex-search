@@ -66,7 +66,7 @@ gcloud artifacts docker tags add northamerica-northeast1-docker.pkg.dev/$ARTIFAC
 gcloud artifacts docker tags add northamerica-northeast1-docker.pkg.dev/$ARTIFACT_REGISTRY_PROJECT/vm-repo/name-request-solr-follower:$SOURCE_TAG northamerica-northeast1-docker.pkg.dev/$ARTIFACT_REGISTRY_PROJECT/vm-repo/name-request-solr-follower:$ENV
 ```
 
-### Deploying the new instances <-- HERE
+### Deploying the new instances
 
 1. Set the NEW leader and follower instance names:
    ```
@@ -76,7 +76,7 @@ gcloud artifacts docker tags add northamerica-northeast1-docker.pkg.dev/$ARTIFAC
    ```
    NEW_FOLLOWER_VM=namex-solr-follower-$ENV-$(date -u +"%Y-%m-%d--%H%M%S")
    ```
-2. Set the OLD leader name (for later): <-- don't need to when setting up brand new instance <-- Not needed first time
+2. Set the OLD leader name (for later): <-- don't need to when setting up brand new instance
    ```
    OLD_LEADER_VM=$(gcloud compute instances list --format="value(name)" --filter name:namex-solr-leader-$ENV --project=$PROJECT_ID)
    ```
@@ -116,7 +116,7 @@ gcloud artifacts docker tags add northamerica-northeast1-docker.pkg.dev/$ARTIFAC
     curl -X POST -H 'Content-type: application/json' -d '{"set-user-property":{"solr.leaderUrl": "http://'${NEW_LEADER_INTERNAL_IP}':8983/solr/namex_search"}}' http://$NEW_FOLLOWER_EXTERNAL_IP:8983/solr/namex_search_follower/config/requestHandler
     ```
 4. Wait for the new FOLLOWER instance to finish copying the leader index *(~tbd mins for prod)* / check logs for errors: *<NEW_FOLLOWER_EXTERNAL_IP>:8983/solr/namex_search_follower/replication*
-5. Add the NEW follower instance to the follower network: // <- DONE
+5. Add the NEW follower instance to the follower network:
     ```
     gcloud compute instance-groups unmanaged add-instances namex-solr-follower-grp-$ENV --zone northamerica-northeast1-a --instances $NEW_FOLLOWER_VM --project $PROJECT_ID
     ```
