@@ -17,7 +17,7 @@ ENV=test
 ```
 
 ```
-PROJECT=a083gt
+PROJECT=
 ```
 
 ```

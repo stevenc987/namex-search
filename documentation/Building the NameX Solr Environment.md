@@ -33,6 +33,9 @@ VPC_SUBNET=bcr-common-test-montreal
 REGION=northamerica-northeast1
 ZONE=northamerica-northeast1-a
 ```
+
+### API Networking Stuff
+
 Assign internal static IP
 ```
 LB_LEADER_IP=$(gcloud compute addresses create namex-solr-ilb-ip \
@@ -47,45 +50,6 @@ LB_FOLLOWER_IP=$(gcloud compute addresses create namex-solr-follower-ilb-ip \
   --project="$PROJECT_ID" \
   --format="value(address)")
 ```
-
-
-### API Networking Stuff
-<!-- 1. Reserve an external static IP for the api <-- probably don't need static IP, for the cloudrun
-   ```
-   STATIC_IP_NAME=namex-solr-api-ip-$ENV
-   ```
-
-   ```
-   gcloud compute addresses create $STATIC_IP_NAME --project=$PROJECT_ID --region=northamerica-northeast1
-   ```
-   *Set the generated static IP (used later)*
-   ```
-   STATIC_IP=$(gcloud compute addresses list --filter NAME:$STATIC_IP_NAME --project=$PROJECT_ID --format="value(address_range())")
-   ``` -->
-<!-- 2. Create the router
-   ```
-   ROUTER_NAME=namex-solr-api-router-$ENV
-   ```
-
-   ```
-   gcloud compute routers create $ROUTER_NAME --project=$PROJECT_ID --region=northamerica-northeast1 --network=$VPC_NETWORK
-   ```
-3. Create the NAT gateway
-   ```
-   NAT_GW_NAME=namex-solr-api-nat-gw-$ENV
-   ```
-
-   ```
-   gcloud compute routers nats create $NAT_GW_NAME --router=$ROUTER_NAME --region=northamerica-northeast1 --nat-all-subnet-ip-ranges --nat-external-ip-pool=$STATIC_IP_NAME --project=$PROJECT_ID
-   ```
-
-4.  Create the vm connector - not neeeded because connector already exists
-```
-CONNECTOR_NAME=namex-solr-connector-$ENV
-```
-```
-gcloud compute networks vpc-access connectors create $CONNECTOR_NAME --region=northamerica-northeast1 --network=default --range=10.8.0.0/28 --min-instances=2 --max-instances=10 --machine-type=e2-micro --project=$PROJECT_ID
-``` -->
 
 ### Solr Networking stuff
 1. Create instance follower/leader instance groups
@@ -178,52 +142,6 @@ gcloud compute networks vpc-access connectors create $CONNECTOR_NAME --region=no
 
 
    ```
-<!-- 4. Create a basic cloud armor policy < --- this is only possible if we have external load balancer
-   - Create Policy
-   - Fill in the name and leave the defaults / create
-     *set the name in your shell for later*
-      ```
-      POLICY_NAME=namex-solr-policy-$ENV
-      gcloud compute security-policies create $POLICY_NAME \
-      --project=$PROJECT_ID
-
-      OCP_POLICY_NAME=ocp-policy-$ENV
-      REGION=northamerica-northeast1
-
-      gcloud compute security-policies create $OCP_POLICY_NAME \
-    --project=$PROJECT_ID \
-    --region=$REGION      
-
-	  ``` -->
-   <!-- - Update the policy to allow the API connection <-- probably don't need as we won't have the static IP
-      ```
-      ALLOW_API_RULE_NAME=allow-namex-solr-api-access-$ENV
-	  ```
-
-      ```
-      gcloud compute security-policies rules create 450 --project=$PROJECT_ID --action=allow --security-policy=$POLICY_NAME --src-ip-ranges=$STATIC_IP/32 --description=$ALLOW_API_RULE_NAME
-	  ``` -->
-   <!-- - Update the policy to allow OCP connection <- this may be not necessary if access api directly
-      ```
-      ALLOW_OCP_RULE_NAME=allow-OCP-access-$ENV
-	  ```
-
-	   ```
-     OCP_IP_RANGES="142.34.194.121/32,142.34.194.122/32,142.34.194.123/32,142.34.194.124/32"
-	  ```
-
-      ```
-      gcloud compute security-policies rules create 500 \
-      --project=$PROJECT_ID \
-      --region=northamerica-northeast1 \
-      --action=allow \
-      --security-policy=$OCP_POLICY_NAME \
-      --src-ip-ranges="$OCP_IP_RANGES" \
-      --description="$ALLOW_OCP_RULE_NAME"
-
-	  ```
-    - Switch the default Allow rules to Deny via UI -->
-
 1. Create the follwer/leader load balancers
    - Navigation Menu/Network Services/Load balancing (in the UI)
    - Create Load Balancer
@@ -417,17 +335,6 @@ gcloud compute forwarding-rules create namex-solr-follower-ilb-rule \
      ARTIFACT_REGISTRY_PROJECT=c4hnrd-tools
      ```
 
-     <!-- ```<--- UNUSED
-     IMAGE_PATH=$ARTIFACT_REGISTRY_PROJECT/vm-repo
-    ```
-     ```
-     IMAGE_FOLLOWER=$(gcloud artifacts docker images list northamerica-northeast1-docker.pkg.dev/$IMAGE_PATH --filter IMAGE:name-request-solr-follower --format="value(IMAGE)" --limit=1):$ENV
-     ```
-
-     ```
-     IMAGE_LEADER=$(gcloud artifacts docker images list northamerica-northeast1-docker.pkg.dev/$IMAGE_PATH --filter IMAGE:name-request-solr-leader --format="value(IMAGE)" --limit=1):$ENV
-     ``` -->
-
      ```
      BOOT_DISK_IMAGE=cos-121-18867-199-38
      ```
@@ -510,23 +417,3 @@ gcloud compute forwarding-rules create namex-solr-follower-ilb-rule \
    gcloud projects add-iam-policy-binding $ARTIFACT_REGISTRY_PROJECT --member serviceAccount:$SERVICE_ACCOUNT --role=roles/artifactregistry.serviceAgent
    ```
 2. *Deploy, create, and load the solr VMs
-
-<!-- ### Scheduler (for SOLR sync via API) <-- i don't think this has been used
-
-```
-API_URL=$(gcloud run services describe search-api --platform managed --format 'value(status.url)' --region northamerica-northeast1 --project $PROJECT_ID)/api/v1/internal/solr/update/sync
-```
-
-```
-gcloud scheduler jobs create http search-solr-sync-job-$ENV --schedule "*/3 * * * *" --uri $API_URL --http-method GET --location northamerica-northeast1 --project $PROJECT_ID
-```
-
-### Scheduler (for SOLR sync heartbeat via API)
-
-```
-API_URL=$(gcloud run services describe search-api --platform managed --format 'value(status.url)' --region northamerica-northeast1 --project $PROJECT_ID)/api/v1/internal/solr/update/sync/heartbeat
-```
-
-```
-gcloud scheduler jobs create http search-solr-sync-heartbeat-job-$ENV --schedule "*/15 * * * *" --uri $API_URL --http-method GET --location northamerica-northeast1 --project $PROJECT_ID
-``` -->
