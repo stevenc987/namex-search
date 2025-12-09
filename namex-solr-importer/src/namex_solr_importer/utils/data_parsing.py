@@ -34,7 +34,8 @@
 """Data parsing functions."""
 from datetime import datetime
 
-from namex_solr_api.services.namex_solr.doc_models import Name, PossibleConflict
+from namex_solr_api.services.namex_solr.doc_models import (Name,
+                                                           PossibleConflict)
 
 
 def _parse_names(data: dict, type: str) -> list[Name]:
@@ -53,6 +54,7 @@ def _parse_names(data: dict, type: str) -> list[Name]:
 
 def parse_conflict(data: dict, type: str) -> PossibleConflict:
     """Parse the data as a PossibleConflict."""
+    converted_start_date = None
     if start_date := data.get("start_date"):
         converted_start_date = datetime.isoformat(start_date, timespec="seconds").replace("+00:00", "")
     return PossibleConflict(
