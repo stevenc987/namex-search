@@ -36,9 +36,11 @@ from flask import Blueprint
 
 from .command import bp as command_bp
 from .imports import bp as import_bp
+from .reindex import bp as reindex_bp
 from .update import bp as update_bp
 
 bp = Blueprint("SOLR", __name__, url_prefix="/solr")
 bp.register_blueprint(command_bp)
 bp.register_blueprint(import_bp)
 bp.register_blueprint(update_bp)
+bp.register_blueprint(reindex_bp)
