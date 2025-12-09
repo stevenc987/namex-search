@@ -50,7 +50,7 @@ def _call_reindex_endpoint(endpoint: str, timeout: int = 1800) -> bool:
     headers = {"Authorization": f"Bearer {token}"}
     url = f"{current_app.config['SOLR_API_URL']}/internal/solr/reindex/{endpoint}"
 
-    current_app.logger.debug(f"Calling reindex endpoint: {endpoint}…")
+    current_app.logger.debug(f"Calling reindex endpoint: '{endpoint}' ...")
     try:
         resp = requests.post(url, headers=headers, timeout=timeout)
         if resp.status_code not in (HTTPStatus.OK, HTTPStatus.CREATED, HTTPStatus.ACCEPTED):

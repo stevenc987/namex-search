@@ -52,15 +52,22 @@ bp = Blueprint("REINDEX", __name__, url_prefix="/reindex")
 # Helper function
 # -----------------------------
 def get_replication_detail(field: str, leader: bool):
-    """Return the replication detail for the core."""
-    details: dict = solr.replication("details", leader).json()["details"]
-    # remove unwanted data
+    """Return the replication detail for the core, safely handling optional follower."""
+    details: dict = solr.replication("details", leader).json().get("details", {})
+
+    # Remove unwanted data
     if field != "commits" and "commits" in details:
         del details["commits"]
-    if not leader and field != "leaderDetails" and "leaderDetails" in details.get("follower", {}):
-        del details["follower"]["leaderDetails"]
+
+    follower_details = details.get("follower", {})  # safe fallback
+    if not leader and field != "leaderDetails" and "leaderDetails" in follower_details:
+        del follower_details["leaderDetails"]
+
     current_app.logger.debug("Full replication details: %s", details)
-    return details.get(field) if leader else details["follower"].get(field)
+
+    if leader:
+        return details.get(field)
+    return follower_details.get(field)
 
 
 # -----------------------------
@@ -94,12 +101,15 @@ def reindex_prep_endpoint():
                     backup_succeeded = True
                     break
             sleep(30 + (i*2))
+
         if not backup_succeeded:
             raise SolrException("Failed to backup leader index", HTTPStatus.INTERNAL_SERVER_ERROR)
 
         if current_app.config.get("HAS_FOLLOWER", True):
             is_polling_disabled = get_replication_detail("isPollingDisabled", False)
-            if not bool(is_polling_disabled):
+            if is_polling_disabled is None:
+                current_app.logger.warning("Follower details missing; cannot verify polling status.")
+            elif not bool(is_polling_disabled):
                 raise SolrException(
                     "Failed to disable polling on follower",
                     str(is_polling_disabled),
@@ -163,7 +173,9 @@ def reindex_recovery_endpoint():
             current_app.logger.debug(f"Checking restore status {i+1}/100...")
             status = solr.replication("restorestatus", True)
             current_app.logger.debug(status.json())
-            if status.json().get("restorestatus", {}).get("status") == "success":
+            status_json = status.json()
+            restore_status = status_json.get("restorestatus", {}).get("status")
+            if restore_status == "success":
                 current_app.logger.debug("Restore complete.")
                 enable_replication = solr.replication("enablereplication", True)
                 current_app.logger.debug(enable_replication.json())
@@ -172,7 +184,7 @@ def reindex_recovery_endpoint():
                 enable_polling = solr.replication("enablepolling", False)
                 current_app.logger.debug(enable_polling.json())
                 return jsonify({"message": "Recovery completed successfully."}), HTTPStatus.OK
-            if status.json().get("status") == "failed":
+            if status_json.get("status") == "failed":
                 break
             sleep(10 + (i*2))
 
