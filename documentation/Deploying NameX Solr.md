@@ -106,7 +106,7 @@ gcloud artifacts docker tags add northamerica-northeast1-docker.pkg.dev/$ARTIFAC
 3. Update the new FOLLOWER instance config for the cluster:
    *NOTE: if the connection is refused try waiting a couple minutes and then retry (the solr core is probably still booting up). If it is still refused make sure you have firewall permissions to access VM IPs*
     ```
-    curl -X POST -H 'Content-type: application/json' -d '{"set-user-property":{"solr.leaderUrl": "http://'${NEW_LEADER_INTERNAL_IP}':8983/solr/name_request"}}' http://$NEW_FOLLOWER_INTERNAL_IP:8983/solr/name_request_follower/config/requestHandler
+    curl -X POST -H 'Content-type: application/json' -d '{"set-user-property":{"solr.leaderUrl": "http://'${NEW_LEADER_INTERNAL_IP}':8983/solr/name_request"}}' http://$NEW_FOLLOWER_INTERNAL_IP:8983/solr/name_request_follower/config/requestHandler?componentName=/replication
 
     ```
 4. Wait for the new FOLLOWER instance to finish copying the leader index *(~tbd mins for prod)* / check logs for errors: *<FOLLOWER_EXTERNAL_IP>:8983/solr/namex_search_follower/replication*
