@@ -38,7 +38,7 @@ from datetime import UTC, datetime
 from enum import auto
 
 from sqlalchemy import Column, DateTime, String, func
-from sqlalchemy.dialects.postgresql import JSONB, insert
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from namex_solr_api.common.base_enum import BaseEnum
@@ -127,7 +127,6 @@ class SolrSynonymList(Base):
             synonyms_updated += [synonym, *synonym_list]
         db.session.commit()
         return synonyms_updated
-
 
     @staticmethod
     def delete_all(synonym_type: Type, preserved_synonyms: list[str] | None = None):
