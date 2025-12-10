@@ -112,48 +112,19 @@ class SolrSynonymList(Base):
                 SolrSynonymList(synonym=synonym, synonym_list=synonym_list, synonym_type=synonym_type.value)
             )
 
-
     @staticmethod
-    def create_or_replace_all(synonyms: dict[str, list[str]], synonym_type: SolrSynonymList.Type) -> list[str]:
-        """Bulk update/insert without requiring a DB unique constraint."""
+    def create_or_replace_all(synonyms: dict[str, list[str]], synonym_type: Type) -> list[str]:
+        """Add or replace the given synonyms inside the db."""
         synonyms_updated = []
-
-        # Load existing synonyms for this type
-        existing = SolrSynonymList.find_all_by_synonym_type(synonym_type)
-        existing_map = {s.synonym.lower(): s for s in existing}
-
-        for main_synonym, synonym_list in synonyms.items():
-            cleaned_list = [syn.strip() for syn in synonym_list if syn and syn != main_synonym]
-
-            # Update existing or add new
-            if main_synonym.lower() in existing_map:
-                obj = existing_map[main_synonym.lower()]
-                obj.synonym_list = list(set(obj.synonym_list + cleaned_list))
-                obj.last_update_date = datetime.now(UTC)
-            else:
-                db.session.add(SolrSynonymList(
-                    synonym=main_synonym.lower(),
-                    synonym_list=cleaned_list,
-                    synonym_type=synonym_type.value,
-                    last_update_date=datetime.now(UTC)
-                ))
-
-            # Also handle list synonyms
-            for list_synonym in cleaned_list:
-                if list_synonym.lower() in existing_map:
-                    obj = existing_map[list_synonym.lower()]
-                    obj.synonym_list = list(set(obj.synonym_list + [main_synonym] + cleaned_list))
-                    obj.last_update_date = datetime.now(UTC)
-                else:
-                    db.session.add(SolrSynonymList(
-                        synonym=list_synonym.lower(),
-                        synonym_list=[main_synonym, *cleaned_list],
-                        synonym_type=synonym_type.value,
-                        last_update_date=datetime.now(UTC)
-                    ))
-
-            synonyms_updated += [main_synonym, *cleaned_list]
-
+        # NOTE: Words should not span multiple synonym lists
+        for synonym, synonym_list in synonyms.items():
+            # NOTE: this will replace the exiting list
+            SolrSynonymList.create_or_replace(synonym_type, synonym, synonym_list, True)
+            # Also needs a mapping from each item in the synonym list to the synonym
+            for list_synonym in synonym_list:
+                # NOTE: this will add to the existing list
+                SolrSynonymList.create_or_replace(synonym_type, list_synonym, [synonym, *synonym_list], False)
+            synonyms_updated += [synonym, *synonym_list]
         db.session.commit()
         return synonyms_updated
 
