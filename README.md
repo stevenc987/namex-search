@@ -20,9 +20,11 @@ Before running the script, ensure the following:
 
 Make sure to populate desired variable values correctly, e.g. ENV, LABEL, etc.
 
-```bash
+```
 chmod +x gcp-solr-infra.sh
-./documentation/gcp-solr-infra.sh.sh <-- it is important to run this from 1 level higher as the script references location of startup.txt
+./documentation/gcp-solr-infra.sh.sh
+```
+it is important to run this from 1 level higher as the script references location of startup.txt
 
 ⚠️ **Important Notes:**
 
@@ -37,14 +39,14 @@ After VM creation, SOLR replication needs manual configuration:
 1. SSH into a follower VM.
 2. Set the leader URL using curl:
 
-```bash
+```
 curl -X POST -H 'Content-type: application/json' \
   -d '{"set-user-property":{"solr.leaderUrl":"http://<LEADER_INTERNAL_IP>:8983/solr/name_request"}}' \
   http://<FOLLOWER_INTERNAL_IP>:8983/solr/name_request_follower/config/requestHandler?componentName=/replication
 ```
 You can verify that it succeeded via
 
-```bash
+```
 curl "http://<FOLLOWER_INTERNAL_IP>:8983/solr/name_request_follower/config/requestHandler?componentName=/replication"
 ```
 You should see smth like:
