@@ -1,6 +1,17 @@
 # SOLR Infrastructure Deployment Script
 
-This repository contains a Bash script to automate the deployment of a SOLR cluster in Google Cloud Platform (GCP) using a leader/follower architecture. The script sets up instance templates, unmanaged instance groups, internal load balancers (ILB), health checks, firewall rules, and creates SOLR VMs.
+This repository contains Bash scripts to automate the deployment and management of a SOLR cluster in Google Cloud Platform (GCP) using a leader/follower architecture. The scripts are intentionally split into three responsibilities.
+
+## Scripts Overview (Read This First)
+
+| Script | Purpose | When to Run |
+|------|--------|------------|
+| `gcp-solr-infra.sh` | One-time infrastructure setup | New environment or major infra change / Infrastructure bootstrap |
+| `update-solr-base-image.sh` | Create new VM templates with updated COS image | OS / security updates for base image (OS) |
+| `deploy-solr.sh` | Deploy Solr + rotate VMs | App changes or after base image update |
+
+> ⚠️ **Important:**
+> Updating the base image does **not** affect running VMs until a redeploy is performed.
 
 ---
 
@@ -16,7 +27,9 @@ Before running the script, ensure the following:
 
 ---
 
-## Usage
+# Usage
+
+## Script 1: Infrastructure Bootstrap
 
 Make sure to populate desired variable values correctly, e.g. ENV, LABEL, etc.
 
@@ -115,4 +128,32 @@ You should see non-empty follower core:
       }
     }
   }
+```
+
+## Script 2: Base Image (COS) Updates
+
+You will need to update BOOT_DISK_IMAGE variable first.
+
+```
+chmod +x update-solr-base-image.sh
+./documentation/update-solr-base-image.sh
+```
+
+Creates new instance templates. Uses an updated COS base image. Versions templates (e.g. -v2, -v3). Does not touch running VMs
+
+## Script 3: Application Deploy & VM Rotation
+
+Update relevant vars, e.g. ENV, SOURCE_TAG. Can run this script 3 ways:
+
+```
+chmod +x deploy-solr.sh
+./documentation/deploy-solr.sh build   # DEV only
+./documentation/deploy-solr.sh tag     # Promote images
+./documentation/deploy-solr.sh deploy  # Replace VMs
+```
+
+MANUAL STEP REQUIRED: Run importer on leader after new leader vm was created. This script pauses to enforce this requirement:
+
+```
+oc -n cbaab0-$ENV create job --from=cronjob/namex-solr-importer-$ENV namex-solr-importer-$ENV-manual-run
 ```

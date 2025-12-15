@@ -6,8 +6,8 @@ set -euo pipefail
 ### ============================================================
 
 PROJECT="a083gt"
-ENV="prod"
-LABEL="Prod"
+ENV="dev"
+LABEL="Dev"
 PROJECT_ID="${PROJECT}-${ENV}"
 
 VPC_NETWORK="bcr-vpc-${ENV}"

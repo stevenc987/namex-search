@@ -6,7 +6,7 @@ PROJECT=a083gt
 ```
 
 ```
-ENV=test
+ENV=prod
 ```
 
 ```
@@ -14,7 +14,7 @@ PROJECT_ID=$PROJECT-$ENV
 ```
 
 ```
-VPC_NETWORK=bcr-vpc-test
+VPC_NETWORK=bcr-vpc-prod
 ```
 
 ```
@@ -26,7 +26,7 @@ VPC_HOST_PROJECT_ID=$VPC_HOST_PROJECT-$ENV
 ```
 
 ```
-VPC_SUBNET=bcr-common-test-montreal
+VPC_SUBNET=bcr-common-prod-montreal
 ```
 
 ```
@@ -226,7 +226,7 @@ gcloud compute forwarding-rules create namex-solr-follower-ilb-rule \
       ```
      BOOT_DISK_SIZE_LEADER=10GiB
      ``` -->
-     For TEST
+     <!-- For TEST
      ```
      MACHINE_TYPE_FOLLOWER=custom-1-5120
      ```
@@ -238,7 +238,7 @@ gcloud compute forwarding-rules create namex-solr-follower-ilb-rule \
      ```
       ```
      BOOT_DISK_SIZE_LEADER=10GiB
-     ```
+     ``` -->
      <!-- For SANDBOX
      ```
      MACHINE_TYPE_FOLLOWER=custom-1-6656
@@ -251,7 +251,7 @@ gcloud compute forwarding-rules create namex-solr-follower-ilb-rule \
      ```
       ```
      BOOT_DISK_SIZE_LEADER=24GiB
-     ```
+     ``` -->
      For PROD
      ```
      MACHINE_TYPE_FOLLOWER=custom-1-8192-ext
@@ -264,7 +264,7 @@ gcloud compute forwarding-rules create namex-solr-follower-ilb-rule \
      ```
       ```
      BOOT_DISK_SIZE_LEADER=24GiB
-     ``` -->
+     ```
 
    -  create the templates. UPDATE THE STARTUP SCRIPT BEFORE RUNNING in namex-solr/startupscript.txt
     ```
