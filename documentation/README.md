@@ -2,6 +2,8 @@
 
 This repository contains Bash scripts to automate the deployment and management of a SOLR cluster in Google Cloud Platform (GCP) using a leader/follower architecture. The scripts are intentionally split into three responsibilities.
 
+[Figma diagram](https://www.figma.com/board/nEjO2J7H63bFBgP2TKmjM0/Firebase-Infra?node-id=0-1&p=f&t=f41Xb5kWQbtkcSFH-0)
+
 ## Scripts Overview (Read This First)
 
 | Script | Purpose | When to Run |
