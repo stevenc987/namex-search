@@ -59,11 +59,6 @@ class Config:
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-    SOLR_SVC_LEADER_CORE = os.getenv("SOLR_SVC_LEADER_CORE", "name_request")
-    SOLR_SVC_FOLLOWER_CORE = os.getenv("SOLR_SVC_FOLLOWER_CORE", "name_request_follower")
-    SOLR_SVC_LEADER_URL = os.getenv("SOLR_SVC_LEADER_URL", "http://localhost:8863/solr")
-    SOLR_SVC_FOLLOWER_URL = os.getenv("SOLR_SVC_FOLLOWER_URL", "http://localhost:8864/solr")
-    HAS_FOLLOWER = SOLR_SVC_LEADER_URL != SOLR_SVC_FOLLOWER_URL
     # Retry settings
     SOLR_RETRY_TOTAL = int(os.getenv("SOLR_RETRY_TOTAL", "2"))
     SOLR_RETRY_BACKOFF_FACTOR = int(os.getenv("SOLR_RETRY_BACKOFF_FACTOR", "5"))
@@ -164,12 +159,6 @@ class UnitTestingConfig(Config):
     INCLUDE_SYNONYM_LOAD = False
     INCLUDE_COLIN_LOAD = False
     INCLUDE_LEAR_LOAD = False
-    # SOLR
-    SOLR_SVC_LEADER_CORE = os.getenv("TEST_SOLR_SVC_LEADER_CORE", "name_request")
-    SOLR_SVC_FOLLOWER_CORE = os.getenv("TEST_SOLR_SVC_FOLLOWER_CORE", "name_request_follower")
-    SOLR_SVC_LEADER_URL = os.getenv("TEST_SOLR_SVC_LEADER_URL", "http://test.leader.fake")
-    SOLR_SVC_FOLLOWER_URL = os.getenv("TEST_SOLR_SVC_FOLLOWER_URL", "http://test.follower.fake")
-    HAS_FOLLOWER = SOLR_SVC_FOLLOWER_URL != SOLR_SVC_LEADER_URL
 
     SOLR_API_URL = "http://test.SOLR_API_URL.fake"
 

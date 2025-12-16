@@ -37,8 +37,8 @@ from http import HTTPStatus
 
 import requests
 from flask import current_app
-
 from namex_solr_api.exceptions import SolrException
+
 from namex_solr_importer import auth
 
 
@@ -153,7 +153,7 @@ def update_synonyms(payload: dict):
         resp = requests.put(url=f"{current_app.config.get("SOLR_API_URL")}/internal/solr/update/synonyms?prune=true",
                             headers=headers,
                             json={"ALL": payload},
-                            timeout=90)
+                            timeout=1200)
 
         if resp.status_code != HTTPStatus.OK:
             raise Exception({"error": resp.json(), "status_code": resp.status_code})
