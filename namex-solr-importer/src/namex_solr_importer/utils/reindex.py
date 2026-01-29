@@ -39,8 +39,8 @@ from http import HTTPStatus
 
 import requests
 from flask import current_app
-from namex_solr_api.exceptions import SolrException
 
+from namex_solr_api.exceptions import SolrException
 from namex_solr_importer import auth
 
 

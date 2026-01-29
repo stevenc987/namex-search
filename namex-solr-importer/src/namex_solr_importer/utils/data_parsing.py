@@ -34,8 +34,7 @@
 """Data parsing functions."""
 from datetime import datetime
 
-from namex_solr_api.services.namex_solr.doc_models import (Name,
-                                                           PossibleConflict)
+from namex_solr_api.services.namex_solr.doc_models import Name, PossibleConflict
 
 
 def _parse_names(data: dict, type: str) -> list[Name]:
