@@ -78,7 +78,7 @@ class OracleDB:  # pylint: disable=duplicate-code
             getmode=cx_Oracle.SPOOL_ATTRVAL_NOWAIT,
             wait_timeout=1500,
             timeout=3600,
-            session_callback=init_session,
+            session_callback=init_session
         )
 
     @property

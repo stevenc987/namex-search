@@ -174,7 +174,7 @@ def update_synonyms(payload: dict):
             url=f"{current_app.config.get("SOLR_API_URL")}/internal/solr/update/synonyms?prune=true",
             headers=headers,
             json={"ALL": payload},
-            timeout=900,
+            timeout=1200,
         )
 
         if resp.status_code != HTTPStatus.OK:
