@@ -131,7 +131,7 @@ class Config:
         "pool_size": int(DB_MIN_POOL_SIZE),
         "max_overflow": (int(DB_MAX_POOL_SIZE) - int(DB_MIN_POOL_SIZE)),
         "pool_recycle": int(DB_CONN_TIMEOUT),
-        "pool_timeout": int(DB_CONN_WAIT_TIMEOUT),
+        "pool_timeout": int(DB_CONN_WAIT_TIMEOUT)
     }
 
     # Cache stuff
