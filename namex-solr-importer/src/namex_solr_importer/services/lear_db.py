@@ -60,7 +60,7 @@ class LearDB:  # pylint: disable=duplicate-code
                 credentials_path=app.config["GOOGLE_APPLICATION_CREDENTIALS_LEAR"],
                 password=app.config["LEAR_DB_PASSWORD"],
                 host=app.config["LEAR_DB_HOST"],
-                port=app.config["LEAR_DB_PORT"]
+                port=app.config["LEAR_DB_PORT"],
             )
             self.db = BaseDB(db_config, test_connection)
 
