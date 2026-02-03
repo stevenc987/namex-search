@@ -39,7 +39,6 @@ This module loads all the data necessary for the NameX Solr Search.
 import os
 
 from flask import Flask
-from structured_logging import StructuredLogging
 
 from namex_solr_api.services import auth, solr
 from namex_solr_importer.config import (
@@ -49,6 +48,7 @@ from namex_solr_importer.config import (
 )
 from namex_solr_importer.services import lear_db, namex_db, oracle_db
 from namex_solr_importer.version import __version__
+from structured_logging import StructuredLogging
 
 
 def _get_build_openshift_commit_hash():
