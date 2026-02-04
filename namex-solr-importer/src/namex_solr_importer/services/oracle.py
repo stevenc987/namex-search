@@ -62,7 +62,7 @@ class OracleDB:  # pylint: disable=duplicate-code
             cursor = conn.cursor()
             cursor.execute("alter session set TIME_ZONE = 'America/Vancouver'")
 
-        dsn = (
+        dsn_val = (
             f"{current_app.config.get('ORACLE_HOST')}:"
             f"{current_app.config.get('ORACLE_PORT')}/"
             f"{current_app.config.get('ORACLE_DB_NAME')}"
@@ -71,7 +71,7 @@ class OracleDB:  # pylint: disable=duplicate-code
         return cx_Oracle.SessionPool(
             user=current_app.config.get("ORACLE_USER"),
             password=current_app.config.get("ORACLE_PASSWORD"),
-            dsn=dsn,
+            dsn=dsn_val,
             min=1,
             max=10,
             increment=1,
