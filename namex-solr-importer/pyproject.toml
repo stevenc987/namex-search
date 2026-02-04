@@ -189,7 +189,13 @@ markers = [
 [tool.coverage.run]
 branch = true
 source = [
-   "src/search_solr_importer",
+   "namex_solr_importer",
+]
+omit = [
+   "*/__init__.py",
+   "*/oracle.py",
+   "*/utils/*",
+   "*/services/*",
 ]
 
 [tool.coverage.report]
